@@ -10,36 +10,15 @@ db.connect((err) => {
   console.log("MySql connected");
 });
 
-// Create DB
-router.get("/createdb", (req, res) => {
-  let sql = "CREATE DATABASE nodemysql";
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    console.log(result);
-    res.send("database created");
-  });
-});
-
-// Insert multiple entries into employee_table
+// Create Employee Information
 
 router.post("/insertEmployee", (req, res) => {
-  var rows = [
-    { name: "David", department: "IT", salary: 120000 },
-    { name: "Sam", department: "IT", salary: 100000 },
-    { name: "Ravi", department: "Coustomer-Support", salary: 56000 },
-    { name: "Rena", department: "HR", salary: 75000 },
-  ];
+  let { name, department, salary } = req.body;
 
-  let sql = "INSERT INTO employee_table (name, department, salary) VALUES ";
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    sql += `('${row.name}', '${row.department}', '${row.salary}')`;
-    if (i < rows.length - 1) {
-      sql += ",";
-    }
-  }
+  let sql =
+    "INSERT INTO employee_table (name, department, salary) VALUES (?,?,?)";
 
-  db.query(sql, (err, result) => {
+  db.query(sql, [name, department, salary], (err, result) => {
     if (err) throw err;
     console.log("Number of records inserted: " + result.affectedRows);
     res.send("Number of records inserted: " + result.affectedRows);
@@ -48,9 +27,9 @@ router.post("/insertEmployee", (req, res) => {
 
 // Get Infromation
 
-router.get("/getEmployee", (req, res) => {
+router.get("/getEmployee/:id", (req, res) => {
   let sql = "SELECT * FROM employee_table where id = ?";
-  let id = 1;
+  let id = req.params.id;
   db.query(sql, id, (err, result) => {
     if (err) throw err;
     res.send(result);
@@ -60,10 +39,11 @@ router.get("/getEmployee", (req, res) => {
 // Update the information
 
 router.put("/updatedEmployee/:id", (req, res) => {
-  let newName = "Rajendra";
-  let id = req.params.id;
-  let sql = "UPDATE employee_table SET name = ? where id = ?";
-  db.query(sql, [newName, id], (err, result) => {
+  let { name, department, salary } = req.body;
+  let id = Number(req.params.id);
+  let sql =
+    "UPDATE employee_table SET name = ?,department = ?,salary = ? where id = ?";
+  db.query(sql, [name, department, salary, id], (err, result) => {
     if (err) throw err;
     res.send(result);
   });
