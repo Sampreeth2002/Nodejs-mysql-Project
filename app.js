@@ -7,6 +7,12 @@ app.use(bodyParser.json());
 
 // Import routes
 const routes = require("./routes");
+
+app.get("/", (req, res) => {
+  res.send("Main Page");
+  console.log("You have hitted main page");
+});
+
 app.use("/", routes);
 
 app.listen("3000", () => {
