@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 const routes = require("./routes");
 
 app.get("/", (req, res) => {
-  res.send("Main Page");
+  res.send("Home page");
   console.log("You have hitted main page");
 });
 
