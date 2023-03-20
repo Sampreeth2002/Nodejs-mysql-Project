@@ -61,7 +61,7 @@ app.get("/", (req, res) => {
 //   });
 // }
 
-app.get("/repos/:username", getRepos);
+// app.get("/repos/:username", getRepos);
 
 app.use("/", routes);
 
