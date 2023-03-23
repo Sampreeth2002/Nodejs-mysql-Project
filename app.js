@@ -7,13 +7,13 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// const REDIS_PORT = process.env.PORT || 6379;
+const REDIS_PORT = process.env.PORT || 6379;
 
-// const client = redis.createClient({
-//   legacyMode: true,
-//   PORT: REDIS_PORT,
-// });
-// client.connect().catch(console.error);
+const client = redis.createClient({
+  legacyMode: true,
+  PORT: REDIS_PORT,
+});
+client.connect().catch(console.error);
 
 // Import routes
 const routes = require("./routes");
@@ -24,44 +24,44 @@ app.get("/", (req, res) => {
 });
 
 // Set response
-// function setResponse(username, repos) {
-//   return `<h2>${username} has ${repos} repos</h2>`;
-// }
+function setResponse(username, repos) {
+  return `<h2>${username} has ${repos} repos</h2>`;
+}
 
 // Make Request to github for data
 
-// async function getRepos(req, res, next) {
-//   try {
-//     console.log("Fetching Data....");
-//     const { username } = req.params;
-//     const response = await fetch(`https://api.github.com/users/${username}`);
-//     const data = await response.json();
-//     // res.send(data);
-//     const repos = data.public_repos;
+async function getRepos(req, res, next) {
+  try {
+    console.log("Fetching Data....");
+    const { username } = req.params;
+    const response = await fetch(`https://api.github.com/users/${username}`);
+    const data = await response.json();
+    // res.send(data);
+    const repos = data.public_repos;
 
-//     client.setEx(username, 3600, repos);
-//     res.send(setResponse(username, repos));
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500);
-//   }
-// }
+    client.setEx(username, 3600, repos);
+    res.send(setResponse(username, repos));
+  } catch (err) {
+    console.log(err);
+    res.status(500);
+  }
+}
 
 // Cache middleware
-// function cache(req, res, next) {
-//   const { username } = req.params;
+function cache(req, res, next) {
+  const { username } = req.params;
 
-//   client.get(username, (err, data) => {
-//     if (err) throw err;
-//     if (data !== null) {
-//       res.send(setResponse(username, data));
-//     } else {
-//       next();
-//     }
-//   });
-// }
+  client.get(username, (err, data) => {
+    if (err) throw err;
+    if (data !== null) {
+      res.send(setResponse(username, data));
+    } else {
+      next();
+    }
+  });
+}
 
-// app.get("/repos/:username", getRepos);
+app.get("/repos/:username", cache, getRepos);
 
 app.use("/", routes);
 
